@@ -5,6 +5,6 @@ Cloner le [repo](https://github.com/OpenClassrooms-Student-Center/Web-Developer-
 Aller dedans, puis lancez `npm install` pour installer les packages.
 Lancer le projet avec `npm start`
 
-##Lancer le back-end
+## Lancer le back-end
 Cloner ce repo, puis en allant dedans, installer les packages en lançant `npm install`.
 Pour lancer le projet, lancer `node server` ou si vous avez nodemon installé `nodemon server`
