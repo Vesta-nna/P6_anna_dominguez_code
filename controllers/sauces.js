@@ -1,7 +1,7 @@
 const Sauce = require("../models/sauce")
 const fs = require("fs")
 
-exports.createThing = (req, res, next) => {
+exports.createSauce= (req, res, next) => {
   const sauce = JSON.parse(req.body.sauce)
 
   new Sauce({
@@ -13,22 +13,22 @@ exports.createThing = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }))
 }
 
-exports.modifyThing = (req, res, next) => {
-  const thingObject = req.file
+exports.modifySauce= (req, res, next) => {
+  const sauceObject = req.file
     ? {
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
       }
     : { ...req.body }
-  Sauce.updateOne({ _id: req.params.id }, { ...thingObject, _id: req.params.id })
+  Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
     .then(() => res.status(200).json({ message: "Objet modifié !" }))
     .catch((error) => res.status(400).json({ error }))
 }
 
-exports.deleteThing = (req, res, next) => {
+exports.deleteSauce= (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
-    .then((thing) => {
-      const [_, filename] = thing.imageUrl.split("/images/")
+    .then((sauce) => {
+      const [_, filename] = sauce.imageUrl.split("/images/")
 
       fs.unlink(`images/${filename}`, () => {
         Sauce.deleteOne({ _id: req.params.id })
@@ -39,57 +39,51 @@ exports.deleteThing = (req, res, next) => {
     .catch((error) => res.status(500).json({ error }))
 }
 
-exports.likeThing = (req, res, next) => {
+exports.likeSauce= (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
-    .then((sauceUnique) => {
+    .then((sauce) => {
       const userID = req.body.userId;
       const like = req.body.like;
 
       Sauce.updateOne(
         { _id: req.params.id },
-        {
-          $set: (() => {
+        { $set: (() => {
             if (like === 1) {
-              if (sauceUnique.usersLiked.find((_userID) => _userID === userID)) {
+              if (sauce.usersLiked.find((_userID) => _userID === userID)) {
                 return {}
               }
-
               return {
-                usersLiked: [...sauceUnique.usersLiked, userID],
-                likes: sauceUnique.usersLiked.length + 1,
+                usersLiked: [...sauce.usersLiked, userID],
+                likes: sauce.usersLiked.length + 1,
               }
             }
 
             if (like === -1) {
-              if (sauceUnique.usersDisliked.find((_userID) => _userID === userID)) {
+              if (sauce.usersDisliked.find((_userID) => _userID === userID)) {
                 return {}
               }
-
               return {
-                usersDisliked: [...sauceUnique.usersDisliked, userID],
-                dislikes: sauceUnique.usersDisliked.length + 1,
+                usersDisliked: [...sauce.usersDisliked, userID],
+                dislikes: sauce.usersDisliked.length + 1,
               }
             }
 
             if (like === 0) {
               let set = {}
-
-              if (sauceUnique.usersDisliked.find((_userID) => _userID === userID)) {
+              if (sauce.usersDisliked.find((_userID) => _userID === userID)) {
                 set = {
                   ...set,
-                  usersDisliked: sauceUnique.usersDisliked.filter((_userID) => _userID !== userID),
-                  dislikes: sauceUnique.usersDisliked.length - 1,
+                  usersDisliked: sauce.usersDisliked.filter((_userID) => _userID !== userID),
+                  dislikes: sauce.usersDisliked.length - 1,
                 }
               }
-
-              if (sauceUnique.usersLiked.find((_userID) => _userID === userID)) {
+              if (sauce.usersLiked.find((_userID) => _userID === userID)) {
                 set = {
                   ...set,
-                  usersLiked: sauceUnique.usersLiked.filter((_userID) => _userID !== userID),
-                  likes: sauceUnique.usersLiked.length - 1,
+                  usersLiked: sauce.usersLiked.filter((_userID) => _userID !== userID),
+                  likes: sauce.usersLiked.length - 1,
                 }
               }
-
               return set
             }
 
@@ -97,20 +91,20 @@ exports.likeThing = (req, res, next) => {
           })(),
         }
       )
-        .then(() => res.status(200).json({ message: "Actualisation like de la sauce" }))
-        .catch((error) => res.status(409).json({ error }))
+      .then(() => res.status(200).json({ message: "Actualisation like de la sauce" }))
+      .catch((error) => res.status(409).json({ error }))
     })
     .catch((error) => res.status(400).json({ error }))
 }
 
-exports.getOneThing = (req, res, next) => {
+exports.getOneSauce= (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
-    .then((things) => res.status(200).json(things))
+    .then((sauce) => res.status(200).json(sauce))
     .catch((error) => res.status(404).json({ error }))
 }
 
-exports.getAllThing = (req, res, next) => {
+exports.getAllSauce= (req, res, next) => {
   Sauce.find()
-    .then((things) => res.status(200).json(things))
+    .then((sauces) => res.status(200).json(sauces))
     .catch((error) => res.status(400).json({ error }))
 }
